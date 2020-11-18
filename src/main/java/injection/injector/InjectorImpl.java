@@ -25,7 +25,13 @@ public class InjectorImpl implements Injector {
 
     @Override
     public synchronized <T> Provider<T> getProvider(Class<T> type) {
-        return new ProviderImpl<>((T) container.get(type));
+        @SuppressWarnings(value = "unchecked")
+        T binding = (T) container.get(type);
+        if (binding == null) {
+            return null;
+        } else {
+            return new ProviderImpl<>(binding);
+        }
     }
 
     @Override

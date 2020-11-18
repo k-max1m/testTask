@@ -2,15 +2,15 @@ package injection.resources.classForInject;
 
 import injection.annotation.Inject;
 
-public class EventDaoImplOneConstructor implements EventDAO {
+public class EventDaoOneInjectConstructor implements EventDAO {
     private Entity entity;
 
     @Inject
-    public EventDaoImplOneConstructor(Entity entity) {
+    public EventDaoOneInjectConstructor(Entity entity) {
         this.entity = entity;
     }
 
-    public EventDaoImplOneConstructor() {
+    public EventDaoOneInjectConstructor() {
 
     }
 }

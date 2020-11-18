@@ -1,7 +1,10 @@
 package injection.provider;
 
-public class ProviderImpl<T> implements Provider {
+public class ProviderImpl<T> implements Provider<T> {
     private T obj;
+
+    public ProviderImpl() {
+    }
 
     public ProviderImpl(T obj) {
         this.obj = obj;

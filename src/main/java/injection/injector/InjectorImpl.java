@@ -16,7 +16,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class InjectorImpl implements Injector {
-    private Map<Class<?>, Object> container;
+    private final Map<Class<?>, Object> container;
+
 
     public InjectorImpl() {
         container = new HashMap<>();
@@ -24,33 +25,32 @@ public class InjectorImpl implements Injector {
 
     @Override
     public synchronized <T> Provider<T> getProvider(Class<T> type) {
-        return new ProviderImpl<T>((T)container.get(type));
+        return new ProviderImpl<>((T) container.get(type));
     }
 
     @Override
-    public synchronized  <T> void bind(Class<T> intf, Class<? extends T> impl) {
-        Constructor<?>[] allConstructors = impl.getConstructors();
-
-        List<Constructor<?>> annotatedConstructor = Arrays.stream(allConstructors)
-                .filter(o -> o.isAnnotationPresent(Inject.class)).collect(Collectors.toList());
+    public synchronized <T> void bind(Class<T> intf, Class<? extends T> impl) {
+        List<Constructor<?>> annotatedConstructor = Arrays.stream(impl.getConstructors())
+                .filter(o -> o.isAnnotationPresent(Inject.class))
+                .collect(Collectors.toList());
 
         if (annotatedConstructor.size() > 1) {
             throw new TooManyConstructorsException();
         } else if (annotatedConstructor.size() == 0) {
             try {
-                container.put(intf, impl.newInstance());
-            } catch (InstantiationException e) {
+                container.put(intf, impl.getDeclaredConstructor().newInstance());
+            } catch (NoSuchMethodException e) {
                 throw new ConstructorNotFoundException();
-            } catch (IllegalAccessException e) {
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                 e.printStackTrace();
             }
         } else {
             Object[] objects = Arrays.stream(annotatedConstructor.get(0).getParameterTypes()).map(o -> {
                 try {
-                    return o.newInstance();
-                } catch (InstantiationException e) {
+                    return o.getDeclaredConstructor().newInstance();
+                } catch (NoSuchMethodException e) {
                     throw new BindingNotFoundException();
-                } catch (IllegalAccessException e) {
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                     e.printStackTrace();
                 }
                 return null;
